@@ -1,0 +1,14 @@
+
+MAS restaurant {
+
+	infrastructure: Centralised
+
+	environment: env.RestaurantEnvironment()
+
+	agents:
+		customer_1 customer;
+		waiter_1 waiter;
+
+	aslSourcePath:
+		"src/main/asl";
+}
