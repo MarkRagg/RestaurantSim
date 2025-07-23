@@ -8,6 +8,7 @@ import env.model.CustomerId;
 import env.model.RestaurantImpl;
 import env.model.Table;
 import env.model.TableId;
+import jason.asSyntax.ASSyntax;
 import jason.asSyntax.Literal;
 import jason.asSyntax.Structure;
 import jason.environment.Environment;
@@ -17,8 +18,6 @@ public class RestaurantEnvironment extends Environment{
   public static final Literal occupyTable = Literal.parseLiteral("occupy_table(_)");
   public static final Literal goToQueue = Literal.parseLiteral("go_to_queue(_)");
   public static final Literal nextInQueue = Literal.parseLiteral("next_in_queue(_)");
-
-
 
   private Restaurant restaurant;
 
@@ -41,15 +40,19 @@ public class RestaurantEnvironment extends Environment{
     switch (action.getFunctor()) {
       case "free_table":
           result = executeFreeTable(agentName, action);
+          informAgsEnvironmentChanged();
           break;
       case "occupy_table":
           result = executeOccupyTable(agentName, action);
+          informAgsEnvironmentChanged();
           break;
       case "go_to_queue":
           result = executeGoToQueue(agentName, action);
+          informAgsEnvironmentChanged();
           break;
       case "next_in_queue":
           result = restaurant.getNextInQueue() != null;
+          informAgsEnvironmentChanged();
           break;
       default:
           System.err.println("Unknown action: " + action);
@@ -59,20 +62,21 @@ public class RestaurantEnvironment extends Environment{
   }
 
   @Override
-public Collection<Literal> getPercepts(String agName) {
-    Collection<Literal> percepts = new ArrayList<>();
+  public Collection<Literal> getPercepts(String agName) {
+      Collection<Literal> percepts = new ArrayList<>();
 
-    if (agName.startsWith("waiter")) {
-        for (Table table : restaurant.getTables()) {
-            String status = table.isFree() ? "free" : "occupied";
-            Literal l = Literal.parseLiteral("table_status(" + table.getId() + "," + status + ")");
-            percepts.add(l);
-        }
-    }
-    // TODO: add other type of percepts
+      if (agName.startsWith("waiter")) {
+          for (Table table : restaurant.getTables()) {
+              Literal l = ASSyntax.createLiteral("table_status", 
+              ASSyntax.createAtom(table.getId().toString()),
+              ASSyntax.createAtom(table.isFree() ? "free" : "occupied"));
+              percepts.add(l);
+          }
+      }
+      // TODO: add other type of percepts
 
-    return percepts;
-}
+      return percepts;
+  }
 
   private boolean executeFreeTable(String agentName, Structure action) {
     try {
