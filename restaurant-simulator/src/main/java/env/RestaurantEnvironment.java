@@ -16,7 +16,7 @@ import jason.environment.Environment;
 public class RestaurantEnvironment extends Environment{
   public static final Literal freeTable = Literal.parseLiteral("free_table(_)");
   public static final Literal occupyTable = Literal.parseLiteral("occupy_table(_)");
-  public static final Literal goToQueue = Literal.parseLiteral("go_to_queue(_)");
+  public static final Literal goToQueue = Literal.parseLiteral("go_to_queue");
   public static final Literal nextInQueue = Literal.parseLiteral("next_in_queue(_)");
 
   private Restaurant restaurant;
@@ -47,7 +47,7 @@ public class RestaurantEnvironment extends Environment{
           informAgsEnvironmentChanged();
           break;
       case "go_to_queue":
-          result = executeGoToQueue(agentName, action);
+          result = executeGoToQueue(agentName);
           informAgsEnvironmentChanged();
           break;
       case "next_in_queue":
@@ -84,7 +84,6 @@ public class RestaurantEnvironment extends Environment{
       Table table = restaurant.getTable(tableId);
       if (!table.isFree()) {
         table.setFree(true);
-        System.out.println("Table " + tableId + " is now free.");
         return true;
       } else {
         System.out.println("Table " + tableId + " is already free.");
@@ -103,10 +102,8 @@ public class RestaurantEnvironment extends Environment{
       Table table = restaurant.getTable(tableId);
       if (table.isFree()) {
         table.setFree(false);
-        System.out.println("Table " + tableId + " is now occupied.");
         return true;
       } else {
-        System.out.println("Table " + tableId + " is already occupied.");
         return false;
       }
     } catch (Exception e) {
@@ -115,11 +112,10 @@ public class RestaurantEnvironment extends Environment{
     }
   }
 
-  private boolean executeGoToQueue(String agentName, Structure action) {
+  private boolean executeGoToQueue(String agentName) {
     try {
       CustomerId customerId = new CustomerId(agentName);
       restaurant.addToQueue(customerId);
-      System.out.println("Customer " + customerId + " added to the queue.");
       return true;
     } catch (Exception e) {
       System.err.println("Error executing go_to_queue action: " + e.getMessage());

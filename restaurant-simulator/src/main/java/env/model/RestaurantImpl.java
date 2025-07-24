@@ -1,7 +1,7 @@
 package env.model;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 import env.interfaces.Restaurant;
 
@@ -11,7 +11,7 @@ public class RestaurantImpl implements Restaurant {
 
     public RestaurantImpl(List<Table> tables) {
         this.tables = tables;
-        this.queue = List.of();
+        this.queue = new ArrayList<>();
     }
 
     @Override
