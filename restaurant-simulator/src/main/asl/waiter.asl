@@ -2,7 +2,7 @@ waiter_state(free).
 
 +!called_for_a_table[source(Customer)] : waiter_state(free) & table_status(T, free) <-
   -+waiter_state(busy);
-  occupy_table(T);
+  !try_occupy_table(T);
   .print("Waiter: table ", T, " is occupied by ", Customer);
   .wait(500);
   .send(Customer, achieve, assign_table(T));
@@ -31,3 +31,10 @@ waiter_state(free).
 
 +?waiter_state[source(Customer)] : waiter_state(busy) <-
   .print("Sono occupato"). 
+
++!try_occupy_table(T) <-
+  occupy_table(T).
+
+-!try_occupy_table(T) : table_status(Id, free) <-
+  .print("Primo tentativo fallito, provo con un altro tavolo");
+  !try_occupy_table(Id).
