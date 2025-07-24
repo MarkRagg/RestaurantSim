@@ -4,11 +4,13 @@ waiter_state(free).
   -+waiter_state(busy);
   !try_occupy_table(T);
   .print("Waiter: table ", T, " is occupied by ", Customer);
-  .wait(500);
+  .wait(2000);
   .send(Customer, achieve, assign_table(T));
   -+waiter_state(free).
 
 -!called_for_a_table[source(Customer)] : .findall(T, table_status(T, free), []) <-
+  -+waiter_state(busy);
+  .wait(200);
   .send(Customer, achieve, sent_to_queue);
   -+waiter_state(free);
   .print("All tables are occupied, customer ", Customer, " sent to queue").
@@ -30,11 +32,13 @@ waiter_state(free).
   .send(Customer, tell, waiter_available).
 
 +?waiter_state[source(Customer)] : waiter_state(busy) <-
-  .print("Sono occupato"). 
+  .print("Sono occupato");
+  .wait({ +waiter_state(free)});
+  .send(Customer, tell, waiter_available).
 
 +!try_occupy_table(T) <-
   occupy_table(T).
 
 -!try_occupy_table(T) : table_status(Id, free) <-
-  .print("Primo tentativo fallito, provo con un altro tavolo");
+  .print("Primo tentativo fallito, riprovo");
   !try_occupy_table(Id).

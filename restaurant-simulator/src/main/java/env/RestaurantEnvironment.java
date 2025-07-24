@@ -2,6 +2,7 @@ package env;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import env.interfaces.Restaurant;
 import env.model.CustomerId;
@@ -20,10 +21,12 @@ public class RestaurantEnvironment extends Environment{
   public static final Literal nextInQueue = Literal.parseLiteral("next_in_queue(_)");
 
   private Restaurant restaurant;
+  private ReentrantLock lock;
 
   @Override
   public void init(final String[] args) {
       this.restaurant = new RestaurantImpl(List.of(new Table(new TableId("Table_1")), (new Table(new TableId("Table_2")))));
+      this.lock  = new ReentrantLock();
 
       // initialize GUI if requested
       // if ((args.length == 1) && args[0].equals("gui")) {
@@ -97,17 +100,21 @@ public class RestaurantEnvironment extends Environment{
 
   
   private boolean executeOccupyTable(String agentName, Structure action) {
-    try {
-      TableId tableId = new TableId(action.getTerm(0).toString());
-      Table table = restaurant.getTable(tableId);
-      if (table.isFree()) {
-        table.setFree(false);
-        return true;
-      } else {
+    if (lock.tryLock()) {
+      try {
+        TableId tableId = new TableId(action.getTerm(0).toString());
+        Table table = restaurant.getTable(tableId);
+        if (table.isFree()) {
+          table.setFree(false);
+          return true;
+        } else {
+          return false;
+        }
+      } catch (Exception e) {
+        System.err.println("Error executing occupy_table action: " + e.getMessage());
         return false;
       }
-    } catch (Exception e) {
-      System.err.println("Error executing occupy_table action: " + e.getMessage());
+    } else {
       return false;
     }
   }

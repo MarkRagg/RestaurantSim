@@ -11,7 +11,7 @@ assigned_table(none).
     .print("Chiedo a qualcuno");
     .broadcast(askOne, waiter_state);
     .wait({ +waiter_available[source(Waiter)] });  // aspetta la prima risposta
-    .print("Libero");
+    .print("Chiamo il waiter ", Waiter);
     !ask_for_a_table(Waiter).
 
 +!ask_for_a_table(Waiter) <- 
@@ -29,14 +29,14 @@ assigned_table(none).
   -+assigned_table(T);
   -+customer_state(sitting);
   .print("Looking the menu.. ");
-  .wait(20000);
-  .print("Ask and eat..");
   .wait(10000);
+  .print("Ask and eat..");
+  .wait(50000);
   .print("Finish the meal");
-  .wait(5000);
+  .wait(2000);
   free_table(T);
   .print("Finish").
 
 +!wait_random_time <-
   .random(Delay);
-  .wait(Delay*5000).
+  .wait(Delay*1000).
