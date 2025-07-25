@@ -36,6 +36,11 @@ public class RestaurantImpl implements Restaurant {
     }
 
     @Override
+    public List<CustomerId> getQueue() {
+        return this.queue;
+    }
+
+    @Override
     public void addToQueue(CustomerId customerId) {
         this.queue.add(customerId);
     }

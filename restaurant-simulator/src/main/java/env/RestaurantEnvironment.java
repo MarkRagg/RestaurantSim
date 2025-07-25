@@ -25,13 +25,14 @@ public class RestaurantEnvironment extends Environment {
   public static final Literal nextInQueue = Literal.parseLiteral("next_in_queue(_)");
 
   private Restaurant restaurant;
-  private ReentrantLock lock;
+  private ReentrantLock tableLock;
+  private ReentrantLock queueLock;
 
   @Override
   public void init(final String[] args) {
-    this.restaurant = new RestaurantImpl(
-        List.of(new Table(new TableId("Table_1")), (new Table(new TableId("Table_2"))), (new Table(new TableId("Table_3"))), (new Table(new TableId("Table_4"))), (new Table(new TableId("Table_5")))));
-    this.lock = new ReentrantLock();
+    this.restaurant = new RestaurantImpl(List.of(new Table(new TableId("Table_1")), (new Table(new TableId("Table_2")))));
+    this.tableLock = new ReentrantLock();
+    this.queueLock = new ReentrantLock();
     // initialize GUI if requested
     // if ((args.length == 1) && args[0].equals("gui")) {
     // this.view = new FactoryView(this.model);
@@ -57,10 +58,10 @@ public class RestaurantEnvironment extends Environment {
         result = executeGoToQueue(agentName);
         informAgsEnvironmentChanged();
         break;
-      case "next_in_queue":
-        result = restaurant.getNextInQueue() != null;
-        informAgsEnvironmentChanged();
-        break;
+      // case "next_in_queue":
+      //   result = restaurant.getNextInQueue() != null;
+      //   informAgsEnvironmentChanged();
+      //   break;
       default:
         System.err.println("Unknown action: " + action);
         return false;
@@ -86,14 +87,23 @@ public class RestaurantEnvironment extends Environment {
     Literal list = ASSyntax.createLiteral("menu", dishesList);
     percepts.add(list);
 
-    if (agName.startsWith("waiter"))
-    for (Table table : restaurant.getTables()) {
+    ListTerm customerList = ASSyntax.createList();
+    if (agName.startsWith("waiter")) {
+      for (Table table : restaurant.getTables()) {
         Literal l = ASSyntax.createLiteral("table_status",
             ASSyntax.createAtom(table.getId().toString()),
             ASSyntax.createAtom(table.isFree() ? "free" : "occupied"));
         percepts.add(l);
       }
 
+      List<CustomerId> queue = restaurant.getQueue();
+      for (CustomerId customerId : queue) {
+        Literal l = ASSyntax.createAtom(customerId.toString());
+        customerList.add(l);
+      }
+    }
+    Literal queue = ASSyntax.createLiteral("new_queue", customerList);
+    percepts.add(queue);
     ListTerm order_list = ASSyntax.createList();
 
     if (agName.startsWith("chef")) {
@@ -130,7 +140,7 @@ public class RestaurantEnvironment extends Environment {
   }
 
   private boolean executeOccupyTable(String agentName, Structure action) {
-    if (lock.tryLock()) {
+    if (tableLock.tryLock()) {
       try {
         TableId tableId = new TableId(action.getTerm(0).toString());
         Table table = restaurant.getTable(tableId);
@@ -150,14 +160,17 @@ public class RestaurantEnvironment extends Environment {
   }
 
   private boolean executeGoToQueue(String agentName) {
-    try {
-      CustomerId customerId = new CustomerId(agentName);
-      restaurant.addToQueue(customerId);
-      return true;
-    } catch (Exception e) {
-      System.err.println("Error executing go_to_queue action: " + e.getMessage());
+    if (queueLock.tryLock()) {
+      try {
+        CustomerId customerId = new CustomerId(agentName);
+        restaurant.addToQueue(customerId);
+        return true;
+      } catch (Exception e) {
+        System.err.println("Error executing go_to_queue action: " + e.getMessage());
+        return false;
+      }
+    } else {
       return false;
     }
   }
-
 }

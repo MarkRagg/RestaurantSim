@@ -1,5 +1,12 @@
 waiter_state(free).
 chefs_available([]).
+customer_queue([]).
+
+!start_waiter.
+
++!start_waiter <-
+  .queue.create(Q);
+  -+customer_queue(Q).
 
 +!called_for_a_table[source(Customer)] : waiter_state(free) & table_status(T, free) <-
   -+waiter_state(busy);
@@ -16,7 +23,6 @@ chefs_available([]).
   .print("All tables are occupied, customer ", Customer, " sent to queue").
 
 -!called_for_a_table[source(Customer)] : waiter_state(busy) & table_status(_, free) <-
-  // .print("Wait a moment");
   .send(Customer, achieve, wait_a_moment).
 
 -!called_for_a_table[source(Customer)] : true <-
@@ -70,3 +76,18 @@ chefs_available([]).
 
 +chef_available[source(Chef)] : chefs_available(List) <-
   -+chefs_available([Chef | List]).
+
++table_status(T, Status) : table_status(T, free) & customer_queue(Q) <-
+  .length(Q, QueueSize);
+  if (QueueSize > 0) {
+    .queue.remove(Q, Customer);
+    .print("Table ", T, " is free");
+    .send(Customer, tell, your_turn);
+  }.
+
+
++new_queue(Queue) <-
+  .queue.create(Q);
+  -+customer_queue(Q);
+  .queue.add_all(Q, Queue);
+  .print("New queue: ", Queue).

@@ -8,7 +8,7 @@ waiter_to_call(none).
   !wait_random_time;
   .print("Ask to a waiter");
   .broadcast(askOne, waiter_state);
-  .wait({ +waiter_available[source(Waiter)] });  // aspetta la prima risposta
+  .wait({ +waiter_available[source(Waiter)] });
   // .print("Call the waiter ", Waiter);
   !ask_for_a_table(Waiter).
 
@@ -19,9 +19,18 @@ waiter_to_call(none).
   .wait(1000);
   !ask_for_a_waiter.
 
-+!sent_to_queue[source(Waiter)] : true <-
-  go_to_queue;
-  .wait({ +turn[source(Waiter)] }).
++!sent_to_queue[source(_)] : true <-
+  !go_to_queue;
+  .wait({ +your_turn[source(Waiter)] });
+  .print("I'M FREE");
+  !ask_for_a_table(Waiter).
+
++!go_to_queue <-
+  go_to_queue.
+
+-!go_to_queue <-
+  .wait(1000);
+  !go_to_queue.
 
 +!assign_table(T)[source(Waiter)] : true <-
   -+assigned_table(T);
