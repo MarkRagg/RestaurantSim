@@ -15,4 +15,10 @@ public enum Menu {
   public Dish getDish() {
     return dish;
   }
+
+  public static Dish getRandomDish() {
+    Menu[] values = Menu.values();
+    int idx = (int) (Math.random() * values.length);
+    return values[idx].getDish();
+  }
 }
