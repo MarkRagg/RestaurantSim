@@ -3,22 +3,20 @@ chefs_available([]).
 
 +!called_for_a_table[source(Customer)] : waiter_state(free) & table_status(T, free) <-
   -+waiter_state(busy);
-  !try_occupy_table(T);
-  +table_person(T, Customer);
-  .print("Waiter: table ", T, " is occupied by ", Customer);
   .wait(2000);
-  .send(Customer, achieve, assign_table(T));
+  !try_occupy_table(T, Customer);
+  !bring_customer_to_table(Customer);
   -+waiter_state(free).
 
 -!called_for_a_table[source(Customer)] : .findall(T, table_status(T, free), []) <-
   -+waiter_state(busy);
-  .wait(200);
+  .wait(2000);
   .send(Customer, achieve, sent_to_queue);
   -+waiter_state(free);
   .print("All tables are occupied, customer ", Customer, " sent to queue").
 
 -!called_for_a_table[source(Customer)] : waiter_state(busy) & table_status(_, free) <-
-  .print("Wait a moment");
+  // .print("Wait a moment");
   .send(Customer, achieve, wait_a_moment).
 
 -!called_for_a_table[source(Customer)] : true <-
@@ -32,33 +30,43 @@ chefs_available([]).
   -table_person(T, Customer);
   -+waiter_state(free).
 
-+!try_occupy_table(T) <-
-  occupy_table(T).
++!try_occupy_table(T, Customer) <-
+  occupy_table(T);
+  .print("Waiter: table ", T, " is occupied by ", Customer);
+  +table_person(T, Customer).
 
--!try_occupy_table(T) : table_status(Id, free) <-
-  .print("Primo tentativo fallito, riprovo");
-  !try_occupy_table(Id).
+-!try_occupy_table(T, Customer) : table_status(Id, free) <-
+  // .print("Attempt failed, retrying..");
+  !try_occupy_table(Id, Customer).
+
+-!try_occupy_table(T, Customer) : .findall(T, table_status(T, free), []) <-
+  .fail.
+  // .send(Customer, achieve, sent_to_queue);
+  // -+waiter_state(free).
+  // .print("All tables are occupied, customer ", Customer, " sent to queue").
+
++!bring_customer_to_table(Customer) : table_person(Id, Customer) <-
+  // .print("Bringing customer ", Customer, " to table ", Id);
+  .send(Customer, achieve, assign_table(Id)).
 
 +?waiter_state[source(Customer)] : waiter_state(free) <-
-  .print("Mando la disponibilita");
+  .print("I send the disponibility");
   .send(Customer, tell, waiter_available).
 
 +?waiter_state[source(Customer)] : waiter_state(busy) <-
-  .print("Sono occupato");
+  .print("I'm busy");
   .wait({ +waiter_state(free)});
   .send(Customer, tell, waiter_available).
 
-+!take_order(Dish, T)[source(Customer)] : waiter_state(free) & chefs_available(Chefs) <-
++!take_order(Dish)[source(Customer)] : waiter_state(free) & chefs_available(Chefs) & table_person(Id, Customer) <-
   -+waiter_state(busy);
+  .wait(5000);
   .random(Chefs, Chef);
-  .send(Chef, tell, new_order(order(Dish, T)));
+  .send(Chef, tell, new_order(order(Dish, Id)));
   -+waiter_state(free).
- 
-+!take_order(Dish, T)[source(Customer)] : waiter_state(busy) <-
+
++!take_order(Dish)[source(Customer)] : waiter_state(busy) <-
   .send(Customer, achieve, try_later(Dish)).
 
 +chef_available[source(Chef)] : chefs_available(List) <-
   -+chefs_available([Chef | List]).
-
-+table_status(TableId, Status) : Status == free <-
-  .print("Perceived table ", TableId, "is ", Status).

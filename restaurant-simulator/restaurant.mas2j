@@ -9,7 +9,12 @@ MAS restaurant {
 		chef_1 chef;
 		chef_2 chef;
 		waiter_1 waiter;
+		waiter_2 waiter;
 		customer_1 customer;
+		customer_2 customer;
+		customer_3 customer;
+		customer_4 customer;
+		customer_5 customer;
 	
 	aslSourcePath:
 		"src/main/asl";

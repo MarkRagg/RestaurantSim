@@ -11,8 +11,8 @@ order_queue(none).
 +!check_order_queue : order_queue(Q) <-
   .length(Q, QueueSize);
   if (QueueSize > 0) {
-    .print("Start cooking..");
     .queue.remove(Q, Order);
+    .print("Start cooking ", Order);
     Order = order(Dish, TableId, Waiter);
     Dish = dish(Name, PrepTime);
     .wait(PrepTime * 1000);

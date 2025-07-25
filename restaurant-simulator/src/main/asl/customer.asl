@@ -6,10 +6,10 @@ waiter_to_call(none).
 
 +!ask_for_a_waiter : customer_state(free) <-
   !wait_random_time;
-  .print("Chiedo a qualcuno");
+  .print("Ask to a waiter");
   .broadcast(askOne, waiter_state);
   .wait({ +waiter_available[source(Waiter)] });  // aspetta la prima risposta
-  .print("Chiamo il waiter ", Waiter);
+  // .print("Call the waiter ", Waiter);
   !ask_for_a_table(Waiter).
 
 +!ask_for_a_table(Waiter) <- 
@@ -48,11 +48,11 @@ waiter_to_call(none).
   !order_dish(Dish).
 
 +!order_dish(Dish) : Dish = dish(Name, PrepTime) & waiter_to_call(Waiter) & customer_state(sitting) <-
-  .print("Order dish ", Name, " with prep time ", PrepTime, " at waiter ", Waiter);
-  .send(Waiter, achieve, take_order(Dish, T)).
+  .send(Waiter, achieve, take_order(Dish));
+  .print("Order dish ", Name, " at waiter ", Waiter).
 
 +!try_later(Dish)[source(Waiter)] <-
-  .print("Waiter is busy, try later");
+  // .print("Waiter is busy, try later");
   !wait_random_time;
   !order_dish(Dish).
   

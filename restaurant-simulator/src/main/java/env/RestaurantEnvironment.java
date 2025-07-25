@@ -30,7 +30,7 @@ public class RestaurantEnvironment extends Environment {
   @Override
   public void init(final String[] args) {
     this.restaurant = new RestaurantImpl(
-        List.of(new Table(new TableId("Table_1")), (new Table(new TableId("Table_2")))));
+        List.of(new Table(new TableId("Table_1")), (new Table(new TableId("Table_2"))), (new Table(new TableId("Table_3"))), (new Table(new TableId("Table_4"))), (new Table(new TableId("Table_5")))));
     this.lock = new ReentrantLock();
     // initialize GUI if requested
     // if ((args.length == 1) && args[0].equals("gui")) {
@@ -41,7 +41,7 @@ public class RestaurantEnvironment extends Environment {
 
   @Override
   public boolean executeAction(String agentName, Structure action) {
-    System.out.println("[" + agentName + "] doing: " + action);
+    // System.out.println("[" + agentName + "] doing: " + action);
     boolean result = false;
 
     switch (action.getFunctor()) {
