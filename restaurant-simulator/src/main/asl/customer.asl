@@ -34,6 +34,7 @@ waiter_to_call(none).
 
 +!assign_table(T)[source(Waiter)] : true <-
   -+assigned_table(T);
+  go_to_table(T);
   -+customer_state(sitting);
   -+waiter_to_call(Waiter);
   !choose_dish;

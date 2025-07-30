@@ -32,6 +32,10 @@ customer_queue([]).
 
 +!dish_ready(D, T)[source(Chef)] : waiter_state(free) & table_person(T, Customer) <-
   -+waiter_state(busy);
+  go_to_chef(Chef);
+  .wait(2000);
+  go_to_table(T);
+  .wait(2000);
   .send(Customer, tell, dish_arrived(D));
   -table_person(T, Customer);
   -+waiter_state(free).
@@ -84,7 +88,6 @@ customer_queue([]).
     .print("Table ", T, " is free");
     .send(Customer, tell, your_turn);
   }.
-
 
 +new_queue(Queue) <-
   .queue.create(Q);

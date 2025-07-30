@@ -3,7 +3,7 @@ MAS restaurant {
 
 	infrastructure: Centralised
 
-	environment: env.RestaurantEnvironment()
+	environment: env.RestaurantEnvironment(25, 25)
 
 	agents:
 		chef_1 chef;
