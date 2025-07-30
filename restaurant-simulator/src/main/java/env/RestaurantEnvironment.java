@@ -10,8 +10,11 @@ import env.model.CustomerId;
 import env.model.Dish;
 import env.model.Menu;
 import env.model.RestaurantImpl;
+import env.model.RestaurantSize;
 import env.model.Table;
 import env.model.TableId;
+import env.view.RestaurantGuiView;
+import env.view.RestaurantView;
 import jason.asSyntax.ASSyntax;
 import jason.asSyntax.ListTerm;
 import jason.asSyntax.Literal;
@@ -22,27 +25,29 @@ public class RestaurantEnvironment extends Environment {
   public static final Literal freeTable = Literal.parseLiteral("free_table(_)");
   public static final Literal occupyTable = Literal.parseLiteral("occupy_table(_)");
   public static final Literal goToQueue = Literal.parseLiteral("go_to_queue");
+  public static final Literal goToTable = Literal.parseLiteral("go_to_table(_)");
+  public static final Literal goToChef = Literal.parseLiteral("go_to_chef(_)");
   public static final Literal nextInQueue = Literal.parseLiteral("next_in_queue(_)");
+  public static final Literal removeAgent = Literal.parseLiteral("remove_agent");
 
   private Restaurant restaurant;
+  private RestaurantView view;
   private ReentrantLock tableLock;
   private ReentrantLock queueLock;
 
   @Override
   public void init(final String[] args) {
-    this.restaurant = new RestaurantImpl(List.of(new Table(new TableId("Table_1")), (new Table(new TableId("Table_2")))));
+    List<Table> tables = new ArrayList<>(List.of(new Table(new TableId("table_1")), (new Table(new TableId("table_2")))));
+    this.restaurant = new RestaurantImpl(tables, new RestaurantSize(Integer.parseInt(args[0]), Integer.parseInt(args[1])));
+    RestaurantGuiView view = new RestaurantGuiView(this.restaurant);
+    this.view = view;
     this.tableLock = new ReentrantLock();
     this.queueLock = new ReentrantLock();
-    // initialize GUI if requested
-    // if ((args.length == 1) && args[0].equals("gui")) {
-    // this.view = new FactoryView(this.model);
-    // view.setEnvironment(this);
-    // }
+    view.setVisible(true);
   }
 
   @Override
   public boolean executeAction(String agentName, Structure action) {
-    // System.out.println("[" + agentName + "] doing: " + action);
     boolean result = false;
 
     switch (action.getFunctor()) {
@@ -58,19 +63,31 @@ public class RestaurantEnvironment extends Environment {
         result = executeGoToQueue(agentName);
         informAgsEnvironmentChanged();
         break;
-      // case "next_in_queue":
-      //   result = restaurant.getNextInQueue() != null;
+      case "go_to_table":
+        TableId tableId = new TableId(action.getTerm(0).toString());
+        result = this.restaurant.setAgentLocationToTable(agentName, tableId);
+        informAgsEnvironmentChanged();
+        break;
+      case "go_to_chef":
+        String chefName = action.getTerm(0).toString();
+        result = this.restaurant.setAgentLocationToChef(agentName, chefName);
+        informAgsEnvironmentChanged();
+        break;
+      // case "remove_agent":
+      //   result = this.restaurant.removeAgent(agentName);
       //   informAgsEnvironmentChanged();
       //   break;
       default:
         System.err.println("Unknown action: " + action);
         return false;
     }
+    this.notifyModelChangedToView();
     return result;
   }
 
   @Override
   public Collection<Literal> getPercepts(String agName) {
+    initializeAgentIfNeeded(agName);
     Collection<Literal> percepts = new ArrayList<>();
     ListTerm dishesList = ASSyntax.createList();
 
@@ -128,6 +145,7 @@ public class RestaurantEnvironment extends Environment {
       Table table = restaurant.getTable(tableId);
       if (!table.isFree()) {
         table.setFree(true);
+        this.restaurant.removeAgent(agentName);
         return true;
       } else {
         System.out.println("Table " + tableId + " is already free.");
@@ -171,6 +189,17 @@ public class RestaurantEnvironment extends Environment {
       }
     } else {
       return false;
+    }
+  }
+
+  private void notifyModelChangedToView() {
+    view.notifyModelChanged();
+  }
+
+  private void initializeAgentIfNeeded(String agentName) {
+    if (!restaurant.containsAgent(agentName) && !restaurant.isAgentRemoved(agentName)) {
+      restaurant.addAgent(agentName);
+      view.notifyModelChanged();
     }
   }
 }
