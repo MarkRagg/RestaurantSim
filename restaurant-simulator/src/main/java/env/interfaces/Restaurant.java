@@ -89,4 +89,6 @@ public interface Restaurant {
   boolean setAgentLocationToChef(String agent, String chefName);
   
   boolean setAgentLocationToQueue(String agent);
+
+  boolean setAgentLocationToDefault(String agent);
 }

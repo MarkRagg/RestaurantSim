@@ -25,6 +25,7 @@ public class RestaurantEnvironment extends Environment {
   public static final Literal freeTable = Literal.parseLiteral("free_table(_)");
   public static final Literal occupyTable = Literal.parseLiteral("occupy_table(_)");
   public static final Literal goToQueue = Literal.parseLiteral("go_to_queue");
+  public static final Literal goToDefaultPosition = Literal.parseLiteral("go_to_default_position");
   public static final Literal goToTable = Literal.parseLiteral("go_to_table(_)");
   public static final Literal goToChef = Literal.parseLiteral("go_to_chef(_)");
   public static final Literal nextInQueue = Literal.parseLiteral("next_in_queue(_)");
@@ -61,6 +62,10 @@ public class RestaurantEnvironment extends Environment {
         break;
       case "go_to_queue":
         result = executeGoToQueue(agentName);
+        informAgsEnvironmentChanged();
+        break;
+      case "go_to_default_position":
+        result = this.restaurant.setAgentLocationToDefault(agentName);
         informAgsEnvironmentChanged();
         break;
       case "go_to_table":

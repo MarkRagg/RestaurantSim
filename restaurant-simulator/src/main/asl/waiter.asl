@@ -77,10 +77,16 @@ customer_queue([]).
   go_to_table(Id);
   .wait(5000);
   .random(Chefs, Chef);
+  .print("Send Order");
   .send(Chef, tell, new_order(order(Dish, Id)));
   -+waiter_state(free).
 
--!take_order(Dish)[source(Customer)] : waiter_state(busy) <-
++!take_order(Dish)[source(Customer)] : true <-
+  .print("Try later");
+  .send(Customer, achieve, try_later(Dish)).
+
+-!take_order(Dish)[source(Customer)] : true <-
+  .print("Try later");
   .send(Customer, achieve, try_later(Dish)).
 
 +chef_available[source(Chef)] : chefs_available(List) <-
@@ -92,6 +98,11 @@ customer_queue([]).
     .queue.remove(Q, Customer);
     .print("Table ", T, " is free");
     .send(Customer, tell, your_turn);
+  }.
+
++waiter_state(State) <-
+  if(State == free) {
+    go_to_default_position;
   }.
 
 +new_queue(Queue) <-

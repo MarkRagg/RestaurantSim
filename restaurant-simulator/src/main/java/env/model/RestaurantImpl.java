@@ -169,6 +169,21 @@ public class RestaurantImpl implements Restaurant {
         }
     }
 
+    @Override
+    public boolean setAgentLocationToDefault(String agentName) {
+        synchronized (this.agents) {
+            if (agentName.contains("waiter")) {
+                Agent agent = this.agents.get(agentName);
+                Position2D newPosition = this.calculateWaiterPosition();
+                if (this.checkValidMovement(newPosition)) {
+                    agent.setPosition(newPosition);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     private boolean checkValidMovement(Position2D targetPosition) {
         return targetPosition.getX() < this.restaurantSize.getWidth() &&
                targetPosition.getY() < this.restaurantSize.getHeight() && 
@@ -228,10 +243,19 @@ public class RestaurantImpl implements Restaurant {
             .findFirst()
             .orElse(new Position2D(0, 0));
     }
+    
+    private Position2D calculateWaiterPosition() {
+        return IntStream.iterate(getWidth() - 1, i -> i > 0, i -> i - 1)
+            .mapToObj(i -> new Position2D(i, getHeight() - 1))
+            .filter(pos -> this.agents.values().stream()
+                .noneMatch(agent -> agent.getPosition().equals(pos)))
+            .findFirst()
+            .orElse(new Position2D(0, 0));
+    }
 
     private Position2D calculateAgentPosition(String agentName) {
         if (agentName.startsWith("waiter")) {
-            return new Position2D(restaurantSize.getWidth() - 1, restaurantSize.getHeight() - 1);
+            return calculateWaiterPosition();
         } else if (agentName.startsWith("chef")) {
             return this.calculateChefPosition(); 
         } else if (agentName.startsWith("customer")) {
