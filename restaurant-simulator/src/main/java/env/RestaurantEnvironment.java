@@ -37,7 +37,7 @@ public class RestaurantEnvironment extends Environment {
 
   @Override
   public void init(final String[] args) {
-    List<Table> tables = new ArrayList<>(List.of(new Table(new TableId("table_1")), (new Table(new TableId("table_2")))));
+    List<Table> tables = new ArrayList<>(List.of(new Table(new TableId("table_1")), (new Table(new TableId("table_2"))), (new Table(new TableId("table_3")))));
     this.restaurant = new RestaurantImpl(tables, new RestaurantSize(Integer.parseInt(args[0]), Integer.parseInt(args[1])));
     RestaurantGuiView view = new RestaurantGuiView(this.restaurant);
     this.view = view;
@@ -73,10 +73,6 @@ public class RestaurantEnvironment extends Environment {
         result = this.restaurant.setAgentLocationToChef(agentName, chefName);
         informAgsEnvironmentChanged();
         break;
-      // case "remove_agent":
-      //   result = this.restaurant.removeAgent(agentName);
-      //   informAgsEnvironmentChanged();
-      //   break;
       default:
         System.err.println("Unknown action: " + action);
         return false;

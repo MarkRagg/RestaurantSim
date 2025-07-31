@@ -31,21 +31,8 @@ public class RestaurantGuiView extends JFrame implements RestaurantView {
       return smoothColor(brown);
     }
 
-    private static Color negateColor(Color color) {
-        return new Color(255 - color.getRed(), 255 - color.getGreen(), 255 - color.getBlue(), color.getAlpha());
-    }
-
     private static Color smoothColor(Color color) {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 2);
-    }
-
-    private static Color mix(Color c1, Color c2) {
-        return new Color(
-                (c1.getRed() * c1.getAlpha() + c2.getRed() * c2.getAlpha()) / 255 % 256,
-                (c1.getGreen() * c1.getAlpha() + c2.getGreen() * c2.getAlpha()) / 255 % 256,
-                (c1.getBlue() * c1.getAlpha() + c2.getBlue() * c2.getAlpha()) / 255 % 256,
-                Math.min(c1.getAlpha(), c2.getAlpha())
-        );
     }
 
     private final Restaurant model;
