@@ -80,7 +80,7 @@ customer_queue([]).
   .send(Chef, tell, new_order(order(Dish, Id)));
   -+waiter_state(free).
 
-+!take_order(Dish)[source(Customer)] : waiter_state(busy) <-
+-!take_order(Dish)[source(Customer)] : waiter_state(busy) <-
   .send(Customer, achieve, try_later(Dish)).
 
 +chef_available[source(Chef)] : chefs_available(List) <-

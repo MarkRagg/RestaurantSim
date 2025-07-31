@@ -17,7 +17,7 @@ waiter_to_call(none).
 
 +!wait_a_moment[source(Waiter)] <-
   .wait(1000);
-  !ask_for_a_waiter.
+  !ask_for_a_table(Waiter).
 
 +!sent_to_queue[source(_)] : true <-
   !go_to_queue;
@@ -62,7 +62,7 @@ waiter_to_call(none).
   .print("Order dish ", Name, " at waiter ", Waiter).
 
 +!try_later(Dish)[source(Waiter)] <-
-  // .print("Waiter is busy, try later");
+  .print("Waiter is busy, try later");
   !wait_random_time;
   !order_dish(Dish).
   
