@@ -40,6 +40,10 @@ customer_queue([]).
   -table_person(T, Customer);
   -+waiter_state(free).
 
+-!dish_ready(D, T)[source(Chef)] : waiter_state(busy) <-
+  .print("I'm busy now");
+  .send(Chef, achieve, call_waiter_again(D, T)).
+
 +!try_occupy_table(T, Customer) <-
   occupy_table(T);
   .print("Waiter: table ", T, " is occupied by ", Customer);
@@ -70,6 +74,7 @@ customer_queue([]).
 
 +!take_order(Dish)[source(Customer)] : waiter_state(free) & chefs_available(Chefs) & table_person(Id, Customer) <-
   -+waiter_state(busy);
+  go_to_table(Id);
   .wait(5000);
   .random(Chefs, Chef);
   .send(Chef, tell, new_order(order(Dish, Id)));

@@ -25,7 +25,8 @@ order_queue(none).
 +!call_waiter(Waiter, Dish, TableId) <-
   .send(Waiter, achieve, dish_ready(Dish, TableId)).
 
--!call_waiter(Waiter, Dish, TableId) <-
++!call_waiter_again(Dish, TableId)[source(Waiter)] <-
+  .print("Ok, I'll try later");
   .wait(1000);
   !call_waiter(Waiter, Dish, TableId).
 
