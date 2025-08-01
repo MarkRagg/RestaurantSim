@@ -32,7 +32,8 @@ customer_queue([]).
 
 +!dish_ready(D, T)[source(Chef)] : waiter_state(free) & table_person(T, Customer) <-
   -+waiter_state(busy);
-  go_to_chef(Chef);
+  D = dish(Name, _);
+  go_to_chef(Chef, Name, Customer);
   .wait(2000);
   go_to_table(T);
   .wait(2000);
@@ -50,17 +51,12 @@ customer_queue([]).
   +table_person(T, Customer).
 
 -!try_occupy_table(T, Customer) : table_status(Id, free) <-
-  // .print("Attempt failed, retrying..");
   !try_occupy_table(Id, Customer).
 
 -!try_occupy_table(T, Customer) : .findall(T, table_status(T, free), []) <-
   .fail.
-  // .send(Customer, achieve, sent_to_queue);
-  // -+waiter_state(free).
-  // .print("All tables are occupied, customer ", Customer, " sent to queue").
 
 +!bring_customer_to_table(Customer) : table_person(Id, Customer) <-
-  // .print("Bringing customer ", Customer, " to table ", Id);
   .send(Customer, achieve, assign_table(Id)).
 
 +?waiter_state[source(Customer)] : waiter_state(free) <-

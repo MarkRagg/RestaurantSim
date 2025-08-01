@@ -2,6 +2,7 @@ package env.view;
 import javax.swing.*;
 
 import env.interfaces.Restaurant;
+import env.model.Logger;
 import env.model.Position2D;
 
 import java.awt.*;
@@ -36,12 +37,15 @@ public class RestaurantGuiView extends JFrame implements RestaurantView {
     }
 
     private final Restaurant model;
+    private final Logger logger;
     private final Map<Position2D, JButton> buttonsGrid = new HashMap<>();
     private final Map<String, Color> agentColors = new HashMap<>();
+    private final JTextArea logArea;
 
-    public RestaurantGuiView(Restaurant model) {
+
+    public RestaurantGuiView(Restaurant model, Logger logger) {
+        this.logger = logger;
         this.model = Objects.requireNonNull(model);
-
         JPanel contentPane = new JPanel(new BorderLayout());
         JPanel grid = new JPanel(new GridLayout(model.getHeight(), model.getWidth()));
         for (int y = 0; y < model.getHeight(); y++) {
@@ -51,10 +55,13 @@ public class RestaurantGuiView extends JFrame implements RestaurantView {
                 buttonsGrid.put(Position2D.of(x, y), b);
             }
         }
+        logArea = new JTextArea(1, 60);
         contentPane.add(grid, BorderLayout.CENTER);
-        JSlider slider = new JSlider(JSlider.HORIZONTAL, 1, 60, (int) 60);
-        contentPane.add(slider, BorderLayout.SOUTH);
-        // slider.addChangeListener(e -> model.setFPS(slider.getValue()));
+        contentPane.add(logArea, BorderLayout.EAST);
+        logArea.setEditable(false);
+        logArea.setFont(new Font("Monospaced", Font.PLAIN, 10));
+        JScrollPane scrollPane = new JScrollPane(logArea);
+        contentPane.add(scrollPane, BorderLayout.EAST);
         setContentPane(contentPane);
         pack();
     }
@@ -72,6 +79,10 @@ public class RestaurantGuiView extends JFrame implements RestaurantView {
     }
 
     private void updateView() {
+        if (logger.thereIsNewLog()) {
+            logArea.setText("");
+            logger.getAllLogs().forEach(log -> logArea.append(log));
+        }
         buttonsGrid.values().forEach(b -> {
             b.setText(" ");
             b.setBackground(Color.WHITE);
@@ -88,16 +99,20 @@ public class RestaurantGuiView extends JFrame implements RestaurantView {
             b.setFont(new Font("Arial", Font.PLAIN, 8));
         });
         model.getAllAgents().forEach(a -> {
-            Position2D pos = model.getAgentPosition(a);
-            JButton b = buttonsGrid.get(pos);
-            Color c = getColorForAgent(a);
-            b.setBackground(c);
-            b.setForeground(Color.BLACK);
-            String label = a.replace("customer_", "C")
-                .replace("waiter_", "W")
-                .replace("chef_", "CH");
-            b.setText(label);
-            b.setFont(new Font("Arial", Font.PLAIN, 8));
+            try {
+                Position2D pos = model.getAgentPosition(a);
+                JButton b = buttonsGrid.get(pos);
+                Color c = getColorForAgent(a);
+                b.setBackground(c);
+                b.setForeground(Color.BLACK);
+                String label = a.replace("customer_", "C")
+                    .replace("waiter_", "W")
+                    .replace("chef_", "CH");
+                b.setText(label);
+                b.setFont(new Font("Arial", Font.PLAIN, 8));
+            } catch (Exception e) {
+                System.out.println("Errore nell'immagine");
+            }
         });
         repaint();
     }

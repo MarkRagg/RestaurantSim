@@ -15,6 +15,7 @@ order_queue(none).
     .print("Start cooking ", Order);
     Order = order(Dish, TableId, Waiter);
     Dish = dish(Name, PrepTime);
+    preparing_dish(TableId, Name);
     .wait(PrepTime * 1000);
     !call_waiter(Waiter, Dish, TableId);
   } else {
@@ -36,4 +37,5 @@ order_queue(none).
 +new_order(Order)[source(Waiter)] : order_queue(Q) <-
   Order = order(Dish, T);
   CompleteOrder = order(Dish, T, Waiter);
+  .print(Order ," Arriving of waiter ", Waiter);
   .queue.add(Q, CompleteOrder).

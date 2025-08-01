@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import env.interfaces.Restaurant;
 import env.model.CustomerId;
 import env.model.Dish;
+import env.model.Logger;
 import env.model.Menu;
 import env.model.RestaurantImpl;
 import env.model.RestaurantSize;
@@ -24,14 +25,17 @@ import jason.environment.Environment;
 public class RestaurantEnvironment extends Environment {
   public static final Literal freeTable = Literal.parseLiteral("free_table(_)");
   public static final Literal occupyTable = Literal.parseLiteral("occupy_table(_)");
+  public static final Literal eating = Literal.parseLiteral("eating(_)");
+  public static final Literal preparingDish = Literal.parseLiteral("preparing_dish(_, _)");
   public static final Literal goToQueue = Literal.parseLiteral("go_to_queue");
   public static final Literal removeFromQueue = Literal.parseLiteral("remove_from_queue(_)");
   public static final Literal goToDefaultPosition = Literal.parseLiteral("go_to_default_position");
   public static final Literal goToTable = Literal.parseLiteral("go_to_table(_)");
-  public static final Literal goToChef = Literal.parseLiteral("go_to_chef(_)");
+  public static final Literal goToChef = Literal.parseLiteral("go_to_chef(_, _, _)");
   public static final Literal nextInQueue = Literal.parseLiteral("next_in_queue(_)");
   public static final Literal removeAgent = Literal.parseLiteral("remove_agent");
 
+  private Logger logger;
   private Restaurant restaurant;
   private RestaurantView view;
   private ReentrantLock tableLock;
@@ -39,9 +43,10 @@ public class RestaurantEnvironment extends Environment {
 
   @Override
   public void init(final String[] args) {
+    this.logger = new Logger();
     List<Table> tables = new ArrayList<>(List.of(new Table(new TableId("table_1")), (new Table(new TableId("table_2"))), (new Table(new TableId("table_3")))));
     this.restaurant = new RestaurantImpl(tables, new RestaurantSize(Integer.parseInt(args[0]), Integer.parseInt(args[1])));
-    RestaurantGuiView view = new RestaurantGuiView(this.restaurant);
+    RestaurantGuiView view = new RestaurantGuiView(this.restaurant, logger);
     this.view = view;
     this.tableLock = new ReentrantLock();
     this.queueLock = new ReentrantLock();
@@ -61,6 +66,12 @@ public class RestaurantEnvironment extends Environment {
         result = executeOccupyTable(agentName, action);
         informAgsEnvironmentChanged();
         break;
+      case "eating":
+        result = logEating(agentName, action);
+        break;
+      case "preparing_dish":
+        result = logPreparingDish(agentName, action);
+        break;
       case "go_to_queue":
         result = executeGoToQueue(agentName);
         informAgsEnvironmentChanged();
@@ -79,8 +90,7 @@ public class RestaurantEnvironment extends Environment {
         informAgsEnvironmentChanged();
         break;
       case "go_to_chef":
-        String chefName = action.getTerm(0).toString();
-        result = this.restaurant.setAgentLocationToChef(agentName, chefName);
+        result = executeGoToChef(agentName, action);
         informAgsEnvironmentChanged();
         break;
       default:
@@ -209,6 +219,30 @@ public class RestaurantEnvironment extends Environment {
     }
   }  
 
+  private boolean executeGoToChef(String agentName, Structure action) {
+    String chefName = action.getTerm(0).toString();
+    String dishName = action.getTerm(1).toString();
+    String customerName = action.getTerm(2).toString();
+    boolean result = this.restaurant.setAgentLocationToChef(agentName, chefName);  
+    if (result) {
+      logger.appendLog(agentName + " bring " + dishName + " to " + customerName);
+    }
+    return result;
+  }
+
+  private boolean logEating(String agentName, Structure action) {
+    String dishName = action.getTerm(0).toString();
+    logger.appendLog(agentName + " is eating " + dishName);
+    return true;
+  }
+
+    private boolean logPreparingDish(String agentName, Structure action) {
+    String tableId = action.getTerm(0).toString();
+    String dishName = action.getTerm(1).toString();
+    logger.appendLog(agentName + " preparing " + dishName + " for " + tableId);
+    return true;
+  }
+
   private void notifyModelChangedToView() {
     view.notifyModelChanged();
   }
@@ -216,7 +250,7 @@ public class RestaurantEnvironment extends Environment {
   private void initializeAgentIfNeeded(String agentName) {
     if (!restaurant.containsAgent(agentName) && !restaurant.isAgentRemoved(agentName)) {
       restaurant.addAgent(agentName);
-      view.notifyModelChanged();
+      notifyModelChangedToView();
     }
   }
 }

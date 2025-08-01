@@ -39,7 +39,9 @@ waiter_to_call(none).
   -+waiter_to_call(Waiter);
   !choose_dish;
   .wait({ +dish_arrived(D)} );
-  .print("Eating dish ", D);
+  D = dish(Name, _);
+  .print("Eating dish ", Name);
+  eating(Name);
   .wait(10000);
   .print("Finish the meal");
   .wait(2000);
