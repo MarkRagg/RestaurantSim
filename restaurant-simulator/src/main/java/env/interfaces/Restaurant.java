@@ -52,6 +52,8 @@ public interface Restaurant {
    */
   void addToQueue(CustomerId customerId);
 
+  boolean removeFromQueue(CustomerId customerId);
+
   /**
    * Returns the queue of customers waiting for a table.
    * @return a list of customer IDs in the queue

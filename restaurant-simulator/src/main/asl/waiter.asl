@@ -77,7 +77,7 @@ customer_queue([]).
   go_to_table(Id);
   .wait(5000);
   .random(Chefs, Chef);
-  .print("Send Order");
+  .print("Send Order of ", Customer, " to chef ", Chef);
   .send(Chef, tell, new_order(order(Dish, Id)));
   -+waiter_state(free).
 
@@ -95,10 +95,17 @@ customer_queue([]).
 +table_status(T, Status) : table_status(T, free) & customer_queue(Q) <-
   .length(Q, QueueSize);
   if (QueueSize > 0) {
-    .queue.remove(Q, Customer);
-    .print("Table ", T, " is free");
-    .send(Customer, tell, your_turn);
+    !remove_customer_from_queue(Q, T);
   }.
+
++!remove_customer_from_queue(Q, T) <-
+  .queue.remove(Q, Customer);
+  remove_from_queue(Customer);
+  .print("Table ", T, " is free");
+  .send(Customer, tell, your_turn).
+
+-!remove_customer_from_queue(Q, T): true <-
+  .print("I'm sorry, go you").
 
 +waiter_state(State) <-
   if(State == free) {

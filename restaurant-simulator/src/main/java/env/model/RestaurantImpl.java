@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import javax.swing.text.Position;
+
 import env.interfaces.Restaurant;
 import java.util.HashSet;
 
@@ -78,7 +80,16 @@ public class RestaurantImpl implements Restaurant {
 
     @Override
     public void addToQueue(CustomerId customerId) {
-        this.queue.add(customerId);
+        synchronized (this.queue) {
+            this.queue.add(customerId);
+        }
+    }
+
+    @Override
+    public boolean removeFromQueue(CustomerId customerId) {
+        synchronized (this.queue) {
+            return this.queue.remove(customerId);
+        }
     }
 
     @Override
@@ -158,9 +169,10 @@ public class RestaurantImpl implements Restaurant {
 
     @Override
     public boolean setAgentLocationToQueue(String agentName) {
-        synchronized (this.agents) {
+        synchronized (this) {
             Agent agent = this.agents.get(agentName);
-            Position2D newPosition = this.calculateAgentToQueuePosition(agent.getPosition());
+            Position2D newPosition = new Position2D(getWidth() - 1, 0);
+            this.updateCustomerQueuePositions();
             if (this.checkValidMovement(newPosition)) {
                 agent.setPosition(newPosition);
                 return true;
@@ -204,18 +216,12 @@ public class RestaurantImpl implements Restaurant {
         }
     }
 
-    // private Position2D calculateWaiterPositions() {
-    //     int height = this.restaurantSize.getHeight() * 7 / 10;
-    //     return IntStream.range(0, getWidth() - 1)
-    //         .mapToObj(i -> new Position2D(i, height))
-    //         .filter(pos -> this.agents.values().stream()
-    //             .noneMatch(agent -> agent.getPosition().equals(pos)))
-    //         .findFirst()
-    //         .orElse(new Position2D(0, height));
-    // }
-
-    private Position2D calculateAgentToQueuePosition(Position2D agentPosition) {
-        return new Position2D(0, 0);
+    private void updateCustomerQueuePositions() {
+        this.queue.forEach(c -> {
+            Agent customer = this.agents.get(c.toString());
+            Position2D oldPos = customer.getPosition();
+            customer.setPosition(Position2D.of(oldPos.getX(), oldPos.getY() + 1));
+        });
     }
 
     private Position2D calculateAgentPositionToTargetPosition(String agentName, Position2D targetPosition) {

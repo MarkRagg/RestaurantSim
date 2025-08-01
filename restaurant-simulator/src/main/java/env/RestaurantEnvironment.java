@@ -25,6 +25,7 @@ public class RestaurantEnvironment extends Environment {
   public static final Literal freeTable = Literal.parseLiteral("free_table(_)");
   public static final Literal occupyTable = Literal.parseLiteral("occupy_table(_)");
   public static final Literal goToQueue = Literal.parseLiteral("go_to_queue");
+  public static final Literal removeFromQueue = Literal.parseLiteral("remove_from_queue(_)");
   public static final Literal goToDefaultPosition = Literal.parseLiteral("go_to_default_position");
   public static final Literal goToTable = Literal.parseLiteral("go_to_table(_)");
   public static final Literal goToChef = Literal.parseLiteral("go_to_chef(_)");
@@ -64,6 +65,10 @@ public class RestaurantEnvironment extends Environment {
         result = executeGoToQueue(agentName);
         informAgsEnvironmentChanged();
         break;
+      case "remove_from_queue":
+        result = executeRemoveFromQueue(agentName, action);
+        informAgsEnvironmentChanged();
+        break; 
       case "go_to_default_position":
         result = this.restaurant.setAgentLocationToDefault(agentName);
         informAgsEnvironmentChanged();
@@ -183,6 +188,7 @@ public class RestaurantEnvironment extends Environment {
       try {
         CustomerId customerId = new CustomerId(agentName);
         restaurant.addToQueue(customerId);
+        restaurant.setAgentLocationToQueue(agentName);
         return true;
       } catch (Exception e) {
         System.err.println("Error executing go_to_queue action: " + e.getMessage());
@@ -192,6 +198,16 @@ public class RestaurantEnvironment extends Environment {
       return false;
     }
   }
+
+  private boolean executeRemoveFromQueue(String agentName, Structure action) {
+    try {
+      CustomerId customerId = new CustomerId(action.getTerm(0).toString());
+      return restaurant.removeFromQueue(customerId);
+    } catch (Exception e) {
+      System.err.println("Error executing remove_from_queue action: " + e.getMessage());
+      return false;
+    }
+  }  
 
   private void notifyModelChangedToView() {
     view.notifyModelChanged();
