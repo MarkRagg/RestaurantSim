@@ -71,6 +71,8 @@ customer_queue([]).
 +!take_order(Dish)[source(Customer)] : waiter_state(free) & chefs_available(Chefs) & table_person(Id, Customer) <-
   -+waiter_state(busy);
   go_to_table(Id);
+  Dish = dish(Name, _);
+  taking_order(Name, Customer);
   .wait(5000);
   .random(Chefs, Chef);
   .print("Send Order of ", Customer, " to chef ", Chef);

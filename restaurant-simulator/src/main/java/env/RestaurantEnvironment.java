@@ -27,6 +27,7 @@ public class RestaurantEnvironment extends Environment {
   public static final Literal occupyTable = Literal.parseLiteral("occupy_table(_)");
   public static final Literal eating = Literal.parseLiteral("eating(_)");
   public static final Literal preparingDish = Literal.parseLiteral("preparing_dish(_, _)");
+  public static final Literal takingOrder = Literal.parseLiteral("taking_order(_, _)");
   public static final Literal goToQueue = Literal.parseLiteral("go_to_queue");
   public static final Literal removeFromQueue = Literal.parseLiteral("remove_from_queue(_)");
   public static final Literal goToDefaultPosition = Literal.parseLiteral("go_to_default_position");
@@ -71,6 +72,9 @@ public class RestaurantEnvironment extends Environment {
         break;
       case "preparing_dish":
         result = logPreparingDish(agentName, action);
+        break;
+      case "taking_order":
+        result = logTakingOrder(agentName, action);
         break;
       case "go_to_queue":
         result = executeGoToQueue(agentName);
@@ -236,10 +240,17 @@ public class RestaurantEnvironment extends Environment {
     return true;
   }
 
-    private boolean logPreparingDish(String agentName, Structure action) {
+  private boolean logPreparingDish(String agentName, Structure action) {
     String tableId = action.getTerm(0).toString();
     String dishName = action.getTerm(1).toString();
     logger.appendLog(agentName + " preparing " + dishName + " for " + tableId);
+    return true;
+  }
+
+    private boolean logTakingOrder(String agentName, Structure action) {
+    String dishName = action.getTerm(0).toString();
+    String customerId = action.getTerm(1).toString();
+    logger.appendLog(agentName + " taking order " + dishName + " from " + customerId);
     return true;
   }
 
