@@ -57,7 +57,7 @@ public class RestaurantImplTest {
     String agentName = "waiter_1";
     this.restaurant.addAgent(agentName);
     assertTrue(this.restaurant.getAllAgents().size() > 0);
-    assertEquals(this.restaurant.getAgentPosition(agentName), Position2D.of(width - 1, height - 1));
+    assertEquals(Position2D.of(width - 1, height - 1), this.restaurant.getAgentPosition(agentName));
   }
 
   @Test
@@ -68,9 +68,9 @@ public class RestaurantImplTest {
     this.restaurant.addAgent(waiter1);
     this.restaurant.addAgent(waiter2);
     this.restaurant.addAgent(waiter3);
-    assertEquals(this.restaurant.getAgentPosition(waiter1), Position2D.of(width - 1, height - 1));
-    assertEquals(this.restaurant.getAgentPosition(waiter2), Position2D.of(width - 2, height - 1));
-    assertEquals(this.restaurant.getAgentPosition(waiter3), Position2D.of(width - 3, height - 1));
+    assertEquals(Position2D.of(width - 1, height - 1), this.restaurant.getAgentPosition(waiter1));
+    assertEquals(Position2D.of(width - 2, height - 1), this.restaurant.getAgentPosition(waiter2));
+    assertEquals(Position2D.of(width - 3, height - 1), this.restaurant.getAgentPosition(waiter3));
   }
 
   @Test
@@ -83,9 +83,9 @@ public class RestaurantImplTest {
     this.restaurant.addAgent(customer1);
     this.restaurant.addAgent(customer2);
     this.restaurant.addAgent(customer3);
-    assertEquals(this.restaurant.getAgentPosition(customer1), Position2D.of(x, y));
-    assertEquals(this.restaurant.getAgentPosition(customer2), Position2D.of(x + 1, y));
-    assertEquals(this.restaurant.getAgentPosition(customer3), Position2D.of(x + 2, y));
+    assertEquals(Position2D.of(x, y), this.restaurant.getAgentPosition(customer1));
+    assertEquals(Position2D.of(x + 1, y), this.restaurant.getAgentPosition(customer2));
+    assertEquals(Position2D.of(x + 2, y), this.restaurant.getAgentPosition(customer3));
   }
 
   @Test
@@ -155,6 +155,16 @@ public class RestaurantImplTest {
     assertNotEquals(Position2D.of(width - 2, height - 1), this.restaurant.getAgentPosition(waiter1));
     this.restaurant.setAgentLocationToDefault(waiter1);
     assertEquals(Position2D.of(width - 2, height - 1), this.restaurant.getAgentPosition(waiter1));
+  }
+
+  @Test
+  public void testIsAgentRemoved() {
+    String agentName = "agent";
+    this.restaurant.addAgent(agentName);
+    this.restaurant.removeAgent(agentName);
+    assertTrue(this.restaurant.getAllAgents().size() == 0);
+    assertTrue(this.restaurant.isAgentRemoved(agentName));
+    assertTrue(this.restaurant.getRemovedAgents().size() == 1);
   }
 
 }
