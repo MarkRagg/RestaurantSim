@@ -158,6 +158,34 @@ public class RestaurantImplTest {
   }
 
   @Test
+  public void testSetWaiterLocationToTable() {
+    String waiter1 = "waiter_1";
+    String waiter2 = "waiter_2";
+    Position2D table1Pos = this.restaurant.getTable(new TableId("table_1")).getPosition();
+    Position2D table2Pos = this.restaurant.getTable(new TableId("table_2")).getPosition();
+    this.restaurant.addAgent(waiter1);
+    this.restaurant.addAgent(waiter2);
+    this.restaurant.setAgentLocationToTable(waiter1, new TableId("table_1"));
+    this.restaurant.setAgentLocationToTable(waiter2, new TableId("table_2"));
+    assertEquals(Position2D.of(table1Pos.getX(), table1Pos.getY() - 1), this.restaurant.getAgentPosition(waiter1));
+    assertEquals(Position2D.of(table2Pos.getX(), table2Pos.getY() - 1), this.restaurant.getAgentPosition(waiter2));
+  }
+
+   @Test
+  public void testSetCustomerLocationToTable() {
+    String customer1 = "customer_1";
+    String customer2 = "customer_2";
+    Position2D table1Pos = this.restaurant.getTable(new TableId("table_1")).getPosition();
+    Position2D table2Pos = this.restaurant.getTable(new TableId("table_2")).getPosition();
+    this.restaurant.addAgent(customer1);
+    this.restaurant.addAgent(customer2);
+    this.restaurant.setAgentLocationToTable(customer1, new TableId("table_1"));
+    this.restaurant.setAgentLocationToTable(customer2, new TableId("table_2"));
+    assertEquals(Position2D.of(table1Pos.getX() - 1, table1Pos.getY()), this.restaurant.getAgentPosition(customer1));
+    assertEquals(Position2D.of(table2Pos.getX() - 1, table2Pos.getY()), this.restaurant.getAgentPosition(customer2));
+  }
+
+  @Test
   public void testIsAgentRemoved() {
     String agentName = "agent";
     this.restaurant.addAgent(agentName);
