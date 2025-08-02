@@ -6,7 +6,7 @@ dependencyResolutionManagement {
 //    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 }
 
-rootProject.name = "ise-lab-code-jason"
+rootProject.name = "restaurant-sim"
 
 include("restaurant-simulator")
 
