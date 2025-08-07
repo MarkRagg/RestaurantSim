@@ -87,8 +87,17 @@ customer_queue([]).
   .print("Try later");
   .send(Customer, achieve, try_later(Dish)).
 
-+chef_available[source(Chef)] : chefs_available(List) <-
-  -+chefs_available([Chef | List]).
++chef_available[source(Chef)] <- 
+  !add_chef(Chef).
+
++!add_chef(Chef) : chefs_available(List) <-
+  -chefs_available(List);
+  .print([Chef | List]);
+  +chefs_available([Chef | List]).
+
+-!add_chef(Chef) <-
+  .wait(100);
+  !add_chef(Chef).
 
 +table_status(T, Status) : table_status(T, free) & customer_queue(Q) <-
   .length(Q, QueueSize);

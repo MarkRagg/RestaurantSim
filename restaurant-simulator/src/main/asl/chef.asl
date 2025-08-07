@@ -5,6 +5,7 @@ order_queue(none).
 +!start_chef <-
   .queue.create(Q);
   -+order_queue(Q);
+  .wait(100);
   !advice_all_waiters;
   !check_order_queue.
 

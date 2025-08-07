@@ -45,7 +45,7 @@ public class RestaurantEnvironment extends Environment {
   @Override
   public void init(final String[] args) {
     this.logger = new Logger();
-    List<Table> tables = new ArrayList<>(List.of(new Table(new TableId("table_1")), (new Table(new TableId("table_2"))), (new Table(new TableId("table_3")))));
+    List<Table> tables = new ArrayList<>(List.of(new Table(new TableId("table_1")), (new Table(new TableId("table_2"))), (new Table(new TableId("table_3"))), (new Table(new TableId("table_4")))));
     this.restaurant = new RestaurantImpl(tables, new RestaurantSize(Integer.parseInt(args[0]), Integer.parseInt(args[1])));
     RestaurantGuiView view = new RestaurantGuiView(this.restaurant, logger);
     this.view = view;
