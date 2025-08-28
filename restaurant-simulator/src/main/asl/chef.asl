@@ -36,7 +36,14 @@ order_queue(none).
   .broadcast(tell, chef_available).
 
 +new_order(Order)[source(Waiter)] : order_queue(Q) <-
+  !add_new_order(Order, Waiter).
+
++!add_new_order(Order, Waiter) : order_queue(Q) <-
   Order = order(Dish, T);
   CompleteOrder = order(Dish, T, Waiter);
   .print(Order ," Arriving of waiter ", Waiter);
   .queue.add(Q, CompleteOrder).
+
+-!add_new_order(Order, Waiter) : order_queue(Q) <-
+  .wait(100);
+  !add_new_order(Order, Waiter).
